@@ -9,3 +9,17 @@
 - fs
 - path
 - http
+
+# ! làm việc với npm
+
+- npm init
+- npm install
+- npm uninstall => npm rm -rf node_modules
+
+# ! cơ chế event loop : FIFO
+
+- khi một hàm có cb thì đưa qua web api xử lí , xử lí trong đưa cb vào queue xử lí ( ưu tiên khi có Promise) , event loop có nhiệm vụ quan sát nếu stack rỗng thì push task queue vào xử lí
+
+# ! events:
+
+- Là tín hiệu/thông báo được phát ra khi có gì đó xảy ra
