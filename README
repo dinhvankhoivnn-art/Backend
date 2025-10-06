@@ -1,0 +1,20 @@
+# ! sự khác biệt giữa Browser & Node
+
+# ! Browser:
+
+- DOM
+- Window
+- Interactive app
+- No FileSystem
+- Fragmentation
+- es6 Modules
+
+# ! Node.js
+
+- No DOM
+- No Window
+- Server Side Apps
+- Non-Interactive app
+- File System
+- Versions
+- CommonJS Modules
