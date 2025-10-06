@@ -1,0 +1,11 @@
+# ! làm việc với Node cơ bản :
+
+- require => lấy module
+- module.exports => export module
+
+# ! các module cơ bản
+
+- os
+- fs
+- path
+- http
