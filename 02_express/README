@@ -1,0 +1,60 @@
+# ! LÀM QUEN VỚI EXPRESS JS:
+
+# ! Khởi động :
+
+- require('express')
+- const app = express()
+
+# ! Methods:
+
+- express.json([options]) => phân tích yêu cầu đến bằng dữ liệu JSON
+- express.raw([options]) => phân tích cú pháp các yêu cầu đến thành Buffer
+- express.Router([options]) => tạo router
+- express.static(root, [options]) => nó phục vụ các tệp tĩnh
+- express.text([options]) => phân tích yêu cầu đến bằng một chuỗi
+- express.urlencoded([options]) => phân tích yêu cầu đến bằng dữ liệu URL-encoded
+
+# ! App:
+
+- app.locals => lưu trữ các biến , dữ liệu toàn cục trong ứng dụng ExpressJS
+- app.mountpath => tạo ra sub app mới theo dõi router
+- app.router => tạo router mới
+- app.emit() => phát ra event , và dữ liệu
+- app.on() => ngồi chờ để nhận 1 event , khi có rồi thì làm nhiệm vụ tiếp theo , xử lí dữ liệu
+- app.all() => xử lí tất cả các yêu cầu thông qua các methods
+- app.get() => xử lí yêu cầu GET
+- app.post() => xử lí yêu cầu POST
+- app.put() => xử lí yêu cầu PUT
+- app.delete() => xử lí yêu cầu DELETE
+- app.disable() => tắt tính năng trong ExpressJS
+- app.enable() => bật tính năng trong ExpressJS
+- app.disabled() => kiểm tra tính năng trong ExpressJS bật hay tắt
+- app.engine() => đăng kí các engine
+- app.set() => cấu hình , thêm tính năng , câu móc
+- app.listen() => lắng nghe port
+- app.param() => xử lí tham số yêu cầu
+- app.path() => trỏ đường dẫn
+- app.use() => Gắn middleware hoặc router vào pipeline xử lý request.
+
+# ! Request: (yêu cầu)
+
+- req.param => lấy ra tham số yêu cầu
+- req.send() => trả lị dữ liệu
+- req.baseUrl => trả về Router
+- req.body => lấy ra dữ liệu body
+- req.cookies => lấy ra cookies
+- req.headers => lấy ra headers
+- req.fresh => làm mới
+- req.host => trả về host
+- req.hostname => trả về hostname
+- req.ip => trả về ip
+- req.ips => trả về ips
+- req.originalUrl => trả về url
+- req.path => trả về path
+- req.protocol => trả về giao thức
+
+# ! Response: (phản hồi)
+
+- res.send() => trả về phản hồi
+- res.render() => trả về view
+- res.status() => trả về status code
