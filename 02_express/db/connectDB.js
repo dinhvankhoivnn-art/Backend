@@ -14,4 +14,6 @@ const connectDB = async () => {
     throw new Error("Lỗi kết nối database !");
   }
 };
+// ! câu hình nâng cao nghiêm ngặt
+mongoose.set("strictQuery", true);
 module.exports = connectDB;
