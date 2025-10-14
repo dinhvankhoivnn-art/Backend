@@ -1,7 +1,7 @@
 // routerPost (fix: mã hóa/giải mã tất cả các trường name, title, content, status; xử lý lỗi decrypt cho từng field/post riêng, không throw để tránh fail toàn bộ; skip field lỗi hoặc trả giá trị null/message)
 const getTime = require("../helper/getTime");
 const Post = require("../model/Post");
-const { encryptData, decryptData } = require("../helper/crypto");
+const { encryptData, decryptData } = require("../core/cryptoUltra");
 
 // Hàm helper để log error
 const logError = (error) => {
