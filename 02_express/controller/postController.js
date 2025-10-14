@@ -1,4 +1,4 @@
-// routerPost (fix getAllPosts: xử lý lỗi decrypt cho từng post riêng, không throw để tránh fail toàn bộ; skip post lỗi hoặc trả content null)
+// routerPost (fix: mã hóa/giải mã tất cả các trường name, title, content, status; xử lý lỗi decrypt cho từng field/post riêng, không throw để tránh fail toàn bộ; skip field lỗi hoặc trả giá trị null/message)
 const getTime = require("../helper/getTime");
 const Post = require("../model/Post");
 const { encryptData, decryptData } = require("../helper/crypto");
@@ -8,7 +8,20 @@ const logError = (error) => {
   console.error(`[${getTime()}] Error:`, error.message || error);
 };
 
-// ! lấy tất cả bài posts (giải mã content trước khi trả về, xử lý lỗi per post)
+// Helper để giải mã một field, xử lý lỗi riêng (trả về giá trị giải mã hoặc message lỗi)
+const safeDecrypt = (encryptedField, iv, fieldName, postId) => {
+  try {
+    return decryptData(encryptedField, iv);
+  } catch (decryptError) {
+    logError(decryptError);
+    console.warn(
+      `[${getTime()}] Lỗi giải mã ${fieldName} cho post ID: ${postId}, set giá trị lỗi`
+    );
+    return "Lỗi giải mã dữ liệu"; // Hoặc null, tùy theo nhu cầu
+  }
+};
+
+// ! lấy tất cả bài posts (giải mã tất cả fields trước khi trả về, xử lý lỗi per field/post)
 const getAllPosts = async (req, res) => {
   try {
     let posts = await Post.find();
@@ -21,25 +34,54 @@ const getAllPosts = async (req, res) => {
         time: getTime(),
       });
     }
-    // Giải mã content cho từng post, xử lý lỗi decrypt riêng (không throw, mà log và set content lỗi)
+    // Giải mã tất cả fields cho từng post, xử lý lỗi riêng (không throw, mà log và set giá trị lỗi)
     const decryptedPosts = posts.map((post) => {
-      let decryptedContent = null; // Default nếu lỗi
-      try {
-        decryptedContent = decryptData(post.encryptedContent, post.iv);
-      } catch (decryptError) {
-        logError(decryptError);
-        console.warn(
-          `[${getTime()}] Lỗi giải mã content cho post ID: ${
-            post._id
-          }, bỏ qua hoặc set null`
-        );
-        // Có thể return null hoặc giữ object với content: 'Decryption failed'
+      const postId = post._id;
+      const decryptedName = safeDecrypt(
+        post.encryptedName,
+        post.ivName,
+        "name",
+        postId
+      );
+      const decryptedTitle = safeDecrypt(
+        post.encryptedTitle,
+        post.ivTitle,
+        "title",
+        postId
+      );
+      const decryptedContent = safeDecrypt(
+        post.encryptedContent,
+        post.ivContent,
+        "content",
+        postId
+      );
+      let decryptedStatus = safeDecrypt(
+        post.encryptedStatus,
+        post.ivStatus,
+        "status",
+        postId
+      );
+
+      // Parse status thành boolean nếu giải mã thành công, иначе default false
+      let statusBool = false;
+      if (decryptedStatus && decryptedStatus !== "Lỗi giải mã dữ liệu") {
+        statusBool = decryptedStatus.toLowerCase() === "true";
       }
+
       return {
         ...post.toObject(),
-        content: decryptedContent || "Lỗi giải mã nội dung", // Trả về message lỗi thay vì crash
+        name: decryptedName,
+        title: decryptedTitle,
+        content: decryptedContent,
+        status: statusBool,
+        encryptedName: undefined,
+        ivName: undefined,
+        encryptedTitle: undefined,
+        ivTitle: undefined,
         encryptedContent: undefined,
-        iv: undefined,
+        ivContent: undefined,
+        encryptedStatus: undefined,
+        ivStatus: undefined,
       };
     });
     res.status(200).json({
@@ -59,8 +101,7 @@ const getAllPosts = async (req, res) => {
   }
 };
 
-// Các hàm khác giữ nguyên (getPostForID, addPost, getPostAndUpdateForID, findPostForIDAndDelete)
-// ! lấy bài posts theo id (giải mã content trước khi trả về)
+// ! lấy bài posts theo id (giải mã tất cả fields trước khi trả về)
 const getPostForID = async (req, res) => {
   try {
     let { id } = req.params;
@@ -79,22 +120,58 @@ const getPostForID = async (req, res) => {
         time: getTime(),
       });
     }
-    let decryptedContent;
-    try {
-      decryptedContent = decryptData(postForID.encryptedContent, postForID.iv);
-    } catch (decryptError) {
-      logError(decryptError);
+    const postId = postForID._id;
+    const decryptedName = safeDecrypt(
+      postForID.encryptedName,
+      postForID.ivName,
+      "name",
+      postId
+    );
+    const decryptedTitle = safeDecrypt(
+      postForID.encryptedTitle,
+      postForID.ivTitle,
+      "title",
+      postId
+    );
+    const decryptedContent = safeDecrypt(
+      postForID.encryptedContent,
+      postForID.ivContent,
+      "content",
+      postId
+    );
+    let decryptedStatus = safeDecrypt(
+      postForID.encryptedStatus,
+      postForID.ivStatus,
+      "status",
+      postId
+    );
+
+    // Parse status thành boolean nếu giải mã thành công
+    let statusBool = false;
+    if (decryptedStatus && decryptedStatus !== "Lỗi giải mã dữ liệu") {
+      statusBool = decryptedStatus.toLowerCase() === "true";
+    } else {
       return res.status(500).json({
         status: false,
         message: "Lỗi giải mã dữ liệu",
         time: getTime(),
       });
     }
+
     const decryptedPost = {
       ...postForID.toObject(),
+      name: decryptedName,
+      title: decryptedTitle,
       content: decryptedContent,
+      status: statusBool,
+      encryptedName: undefined,
+      ivName: undefined,
+      encryptedTitle: undefined,
+      ivTitle: undefined,
       encryptedContent: undefined,
-      iv: undefined,
+      ivContent: undefined,
+      encryptedStatus: undefined,
+      ivStatus: undefined,
     };
     res.status(200).json({
       status: true,
@@ -113,7 +190,7 @@ const getPostForID = async (req, res) => {
   }
 };
 
-// ! thêm dữ liệu Post (mã hóa content trước khi lưu)
+// ! thêm dữ liệu Post (mã hóa tất cả fields trước khi lưu)
 const addPost = async (req, res) => {
   try {
     let { name, title, content, status } = req.body;
@@ -132,17 +209,35 @@ const addPost = async (req, res) => {
         time: getTime(),
       });
     }
-    let iv, encryptedContent;
+    // Mã hóa từng field
+    let encryptedName,
+      ivName,
+      encryptedTitle,
+      ivTitle,
+      encryptedContent,
+      ivContent,
+      encryptedStatus,
+      ivStatus;
     try {
-      console.log(`[${getTime()}] Bắt đầu mã hóa content...`);
-      const encryptResult = encryptData(content.trim());
-      iv = encryptResult.iv;
-      encryptedContent = encryptResult.encryptedData;
-      console.log(
-        `[${getTime()}] Mã hóa thành công, IV length: ${
-          iv.length
-        }, Encrypted length: ${encryptedContent.length}`
-      );
+      console.log(`[${getTime()}] Bắt đầu mã hóa các fields...`);
+
+      const encryptName = encryptData(name.trim());
+      encryptedName = encryptName.encryptedData;
+      ivName = encryptName.iv;
+
+      const encryptTitle = encryptData(title.trim());
+      encryptedTitle = encryptTitle.encryptedData;
+      ivTitle = encryptTitle.iv;
+
+      const encryptContent = encryptData(content.trim());
+      encryptedContent = encryptContent.encryptedData;
+      ivContent = encryptContent.iv;
+
+      const encryptStatus = encryptData(status.toString());
+      encryptedStatus = encryptStatus.encryptedData;
+      ivStatus = encryptStatus.iv;
+
+      console.log(`[${getTime()}] Mã hóa tất cả fields thành công`);
     } catch (encryptError) {
       logError(encryptError);
       return res.status(500).json({
@@ -153,24 +248,57 @@ const addPost = async (req, res) => {
       });
     }
     let newPost = new Post({
-      name: name.trim(),
-      title: title.trim(),
-      encryptedContent: encryptedContent,
-      iv: iv,
-      status: status,
+      encryptedName,
+      ivName,
+      encryptedTitle,
+      ivTitle,
+      encryptedContent,
+      ivContent,
+      encryptedStatus,
+      ivStatus,
     });
     await newPost.save();
-    let decryptedContent;
-    try {
-      decryptedContent = decryptData(newPost.encryptedContent, newPost.iv);
-    } catch (decryptError) {
-      logError(decryptError);
-    }
+    // Giải mã để trả về (tùy chọn, nhưng để kiểm tra)
+    const decryptedName = safeDecrypt(
+      newPost.encryptedName,
+      newPost.ivName,
+      "name",
+      newPost._id
+    );
+    const decryptedTitle = safeDecrypt(
+      newPost.encryptedTitle,
+      newPost.ivTitle,
+      "title",
+      newPost._id
+    );
+    const decryptedContent = safeDecrypt(
+      newPost.encryptedContent,
+      newPost.ivContent,
+      "content",
+      newPost._id
+    );
+    let decryptedStatus = safeDecrypt(
+      newPost.encryptedStatus,
+      newPost.ivStatus,
+      "status",
+      newPost._id
+    );
+    let statusBool = decryptedStatus.toLowerCase() === "true";
+
     const decryptedPost = {
       ...newPost.toObject(),
-      content: decryptedContent || "(Lỗi giải mã tạm thời)",
+      name: decryptedName,
+      title: decryptedTitle,
+      content: decryptedContent,
+      status: statusBool,
+      encryptedName: undefined,
+      ivName: undefined,
+      encryptedTitle: undefined,
+      ivTitle: undefined,
       encryptedContent: undefined,
-      iv: undefined,
+      ivContent: undefined,
+      encryptedStatus: undefined,
+      ivStatus: undefined,
     };
     res.status(201).json({
       status: true,
@@ -188,7 +316,7 @@ const addPost = async (req, res) => {
   }
 };
 
-// ! cập nhật dữ liệu theo id (mã hóa content mới trước khi cập nhật)
+// ! cập nhật dữ liệu theo id (mã hóa fields mới trước khi cập nhật, chỉ mã hóa nếu field được cung cấp)
 const getPostAndUpdateForID = async (req, res) => {
   try {
     let { id } = req.params;
@@ -212,26 +340,63 @@ const getPostAndUpdateForID = async (req, res) => {
       });
     }
     const updateFields = {};
-    if (name) updateFields.name = name.trim();
-    if (title) updateFields.title = title.trim();
-    if (status !== undefined) updateFields.status = status;
-
-    if (content) {
+    if (name) {
       try {
-        console.log(`[${getTime()}] Bắt đầu mã hóa content cập nhật...`);
-        const { iv: newIv, encryptedData: newEncryptedContent } = encryptData(
-          content.trim()
+        const { encryptedData: newEncryptedName, iv: newIvName } = encryptData(
+          name.trim()
         );
-        updateFields.encryptedContent = newEncryptedContent;
-        updateFields.iv = newIv;
-        console.log(`[${getTime()}] Mã hóa cập nhật thành công`);
+        updateFields.encryptedName = newEncryptedName;
+        updateFields.ivName = newIvName;
       } catch (encryptError) {
         logError(encryptError);
         return res.status(500).json({
           status: false,
-          message:
-            "Lỗi mã hóa dữ liệu cập nhật: " +
-            (encryptError.message || "Unknown error"),
+          message: "Lỗi mã hóa name",
+          time: getTime(),
+        });
+      }
+    }
+    if (title) {
+      try {
+        const { encryptedData: newEncryptedTitle, iv: newIvTitle } =
+          encryptData(title.trim());
+        updateFields.encryptedTitle = newEncryptedTitle;
+        updateFields.ivTitle = newIvTitle;
+      } catch (encryptError) {
+        logError(encryptError);
+        return res.status(500).json({
+          status: false,
+          message: "Lỗi mã hóa title",
+          time: getTime(),
+        });
+      }
+    }
+    if (content) {
+      try {
+        const { encryptedData: newEncryptedContent, iv: newIvContent } =
+          encryptData(content.trim());
+        updateFields.encryptedContent = newEncryptedContent;
+        updateFields.ivContent = newIvContent;
+      } catch (encryptError) {
+        logError(encryptError);
+        return res.status(500).json({
+          status: false,
+          message: "Lỗi mã hóa content",
+          time: getTime(),
+        });
+      }
+    }
+    if (status !== undefined) {
+      try {
+        const { encryptedData: newEncryptedStatus, iv: newIvStatus } =
+          encryptData(status.toString());
+        updateFields.encryptedStatus = newEncryptedStatus;
+        updateFields.ivStatus = newIvStatus;
+      } catch (encryptError) {
+        logError(encryptError);
+        return res.status(500).json({
+          status: false,
+          message: "Lỗi mã hóa status",
           time: getTime(),
         });
       }
@@ -256,20 +421,48 @@ const getPostAndUpdateForID = async (req, res) => {
         time: getTime(),
       });
     }
-    let decryptedContent;
-    try {
-      decryptedContent = decryptData(
-        updateForID.encryptedContent,
-        updateForID.iv
-      );
-    } catch (decryptError) {
-      logError(decryptError);
-    }
+    // Giải mã để trả về
+    const postId = updateForID._id;
+    const decryptedName = safeDecrypt(
+      updateForID.encryptedName,
+      updateForID.ivName,
+      "name",
+      postId
+    );
+    const decryptedTitle = safeDecrypt(
+      updateForID.encryptedTitle,
+      updateForID.ivTitle,
+      "title",
+      postId
+    );
+    const decryptedContent = safeDecrypt(
+      updateForID.encryptedContent,
+      updateForID.ivContent,
+      "content",
+      postId
+    );
+    let decryptedStatus = safeDecrypt(
+      updateForID.encryptedStatus,
+      updateForID.ivStatus,
+      "status",
+      postId
+    );
+    let statusBool = decryptedStatus.toLowerCase() === "true";
+
     const decryptedPost = {
       ...updateForID.toObject(),
-      content: decryptedContent || "(Lỗi giải mã tạm thời)",
+      name: decryptedName,
+      title: decryptedTitle,
+      content: decryptedContent,
+      status: statusBool,
+      encryptedName: undefined,
+      ivName: undefined,
+      encryptedTitle: undefined,
+      ivTitle: undefined,
       encryptedContent: undefined,
-      iv: undefined,
+      ivContent: undefined,
+      encryptedStatus: undefined,
+      ivStatus: undefined,
     };
     res.status(200).json({
       status: true,
@@ -289,7 +482,7 @@ const getPostAndUpdateForID = async (req, res) => {
   }
 };
 
-// ! xoá dữ liệu post theo ID
+// ! xoá dữ liệu post theo ID (giữ nguyên, không cần thay đổi vì không liên quan đến mã hóa)
 const findPostForIDAndDelete = async (req, res) => {
   try {
     let { id } = req.params;
