@@ -16,7 +16,7 @@ const getAllStore = async (req, res) => {
         price: 1,
         rating: 1,
         company: 1,
-        _id: 0,
+        _id: 1,
       });
     // ! trả về dữ liệu
     res.status(status.OK).json({
