@@ -186,15 +186,19 @@ const findDataForQuery = async (req, res) => {
     }
 
     // ! tìm kiếm trong DB
-    const data = await Store.find(query).select({
-      name: 1,
-      title: 1,
-      content: 1,
-      price: 1,
-      rating: 1,
-      company: 1,
-      _id: 0,
-    });
+    const data = await Store.find(query)
+      .limit(process.env.SEARCH_QUERY_LIMIT)
+      .sort({ rating: -1 })
+      .select({
+        name: 1,
+        title: 1,
+        content: 1,
+        price: 1,
+        rating: 1,
+        company: 1,
+        _id: 0,
+      })
+      .exec();
 
     // ! kiểm tra kết quả
     if (!data || data.length === 0) {
