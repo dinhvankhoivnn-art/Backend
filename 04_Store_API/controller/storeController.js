@@ -36,7 +36,7 @@ const getAllStore = async (req, res) => {
         time: getTime(),
       });
     }
-
+    // ! bước nhảy
     const skip = (page - 1) * limit;
 
     // Lấy data có skip + limit (chỉ chạy nếu validate pass)
