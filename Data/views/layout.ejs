@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title || 'Backend System' %></title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/animations.css" />
+
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <!-- CSRF Token for forms -->
+    <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <% } %>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <i class="fas fa-server"></i>
+          <span>Backend System</span>
+        </div>
+
+        <div class="nav-menu">
+          <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+          <!-- User Menu -->
+          <div class="nav-item dropdown">
+            <a href="/dashboard" class="nav-link">
+              <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+          </div>
+
+          <% if (currentUser.role === 'admin') { %>
+          <div class="nav-item dropdown">
+            <a href="/api/v1/user" class="nav-link">
+              <i class="fas fa-users"></i> Users
+            </a>
+          </div>
+          <div class="nav-item dropdown">
+            <a href="/event" class="nav-link">
+              <i class="fas fa-calendar-alt"></i> Events
+            </a>
+          </div>
+          <% } %>
+
+          <!-- Profile Dropdown -->
+          <div class="nav-item dropdown">
+            <button class="nav-link dropdown-toggle" onclick="toggleDropdown()">
+              <i class="fas fa-user-circle"></i>
+              <%= currentUser.name %>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu" id="profileDropdown">
+              <a href="/auth/profile" class="dropdown-item">
+                <i class="fas fa-user"></i> Profile
+              </a>
+              <div class="dropdown-divider"></div>
+              <form action="/logout" method="POST" style="display: inline">
+                <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <% } %>
+                <button type="submit" class="dropdown-item logout-btn">
+                  <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </button>
+              </form>
+            </div>
+          </div>
+          <% } else { %>
+          <!-- Login Link -->
+          <div class="nav-item">
+            <a href="/login" class="nav-link">
+              <i class="fas fa-sign-in-alt"></i> Đăng nhập
+            </a>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Mobile menu button -->
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Flash Messages -->
+      <% if (typeof message !== 'undefined' && message) { %>
+      <div class="alert alert-success flash-message" id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        <%= message %>
+        <button onclick="closeAlert('successMessage')" class="alert-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <% } %> <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error flash-message" id="errorMessage">
+        <i class="fas fa-exclamation-triangle"></i>
+        <%= error %>
+        <button onclick="closeAlert('errorMessage')" class="alert-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <% } %>
+
+      <!-- Page Content -->
+      <%- body %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4><i class="fas fa-server"></i> Backend System</h4>
+            <p>Hệ thống quản lý backend với Node.js, Express & MongoDB</p>
+          </div>
+          <div class="footer-section">
+            <h4>Liên kết</h4>
+            <ul>
+              <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/api/v1/user">Users</a></li>
+              <li><a href="/event">Events</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Thông tin</h4>
+            <p>
+              <i class="fas fa-clock"></i> <%= new
+              Date().toLocaleString('vi-VN') %>
+            </p>
+            <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+            <p>
+              <i class="fas fa-user"></i> <%= currentUser.name %> (<%=
+              currentUser.role %>)
+            </p>
+            <% } %>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2024 Backend System. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/js/app.js"></script>
+    <script src="/js/animations.js"></script>
+
+    <!-- CSRF setup for AJAX -->
+    <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+    <script>
+      // Setup CSRF token for AJAX requests
+      const csrfToken = "<%= csrfToken %>";
+      // Add to all AJAX requests
+      document.addEventListener("DOMContentLoaded", function () {
+        const originalFetch = window.fetch;
+        window.fetch = function (url, options = {}) {
+          options.headers = options.headers || {};
+          if (!options.headers["X-CSRF-Token"]) {
+            options.headers["X-CSRF-Token"] = csrfToken;
+          }
+          return originalFetch.call(this, url, options);
+        };
+      });
+    </script>
+    <% } %>
+  </body>
+</html>

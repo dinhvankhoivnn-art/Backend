@@ -1,0 +1,301 @@
+<!-- Users List Page -->
+<div class="users-container">
+    <div class="page-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-users"></i>
+                <% if (isAdmin) { %>
+                    Quản lý Users
+                <% } else { %>
+                    Thông tin cá nhân
+                <% } %>
+            </h1>
+            <p>
+                <% if (isAdmin) { %>
+                    Quản lý tất cả người dùng trong hệ thống
+                <% } else { %>
+                    Xem và chỉnh sửa thông tin cá nhân
+                <% } %>
+            </p>
+        </div>
+
+        <% if (isAdmin) { %>
+            <div class="header-actions">
+                <a href="/api/v1/user/new" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Thêm User mới
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Statistics Cards (chỉ admin) -->
+    <% if (isAdmin) { %>
+        <div class="stats-grid">
+            <div class="stat-card animate-slide-up">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= users.length %></h3>
+                    <p>Tổng Users</p>
+                </div>
+            </div>
+
+            <div class="stat-card animate-slide-up">
+                <div class="stat-icon admin">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= users.filter(u => u.role === 'admin').length %></h3>
+                    <p>Admin</p>
+                </div>
+            </div>
+
+            <div class="stat-card animate-slide-up">
+                <div class="stat-icon user">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= users.filter(u => u.role === 'user').length %></h3>
+                    <p>User thường</p>
+                </div>
+            </div>
+
+            <div class="stat-card animate-slide-up">
+                <div class="stat-icon recent">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3><%= users.filter(u => new Date(u.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length %></h3>
+                    <p>User mới (7 ngày)</p>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Users Table -->
+    <div class="users-table-container">
+        <div class="table-header">
+            <h2>Danh sách Users</h2>
+            <% if (isAdmin) { %>
+                <div class="table-actions">
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm user..." class="search-input">
+                    <select id="roleFilter" class="filter-select">
+                        <option value="">Tất cả vai trò</option>
+                        <option value="admin">Admin</option>
+                        <option value="user">User</option>
+                    </select>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="table-responsive">
+            <table class="users-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user"></i> Tên</th>
+                        <th><i class="fas fa-envelope"></i> Email</th>
+                        <th><i class="fas fa-birthday-cake"></i> Tuổi</th>
+                        <th><i class="fas fa-map-marker-alt"></i> Địa chỉ</th>
+                        <th><i class="fas fa-crown"></i> Vai trò</th>
+                        <th><i class="fas fa-calendar"></i> Ngày tạo</th>
+                        <% if (isAdmin) { %>
+                            <th><i class="fas fa-cogs"></i> Thao tác</th>
+                        <% } %>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach((user, index) => { %>
+                        <tr class="user-row animate-fade-in">
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar">
+                                        <%= user.name.charAt(0).toUpperCase() %>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name"><%= user.name %></div>
+                                        <div class="user-id">#<%= user._id.toString().slice(-6) %></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><%= user.email %></td>
+                            <td>
+                                <span class="age-badge"><%= user.age %></span>
+                            </td>
+                            <td>
+                                <span class="address-text" title="<%= user.address %>">
+                                    <%= user.address.length > 30 ? user.address.substring(0, 30) + '...' : user.address %>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="role-badge <%= user.role %>">
+                                    <i class="fas <%= user.role === 'admin' ? 'fa-crown' : 'fa-user' %>"></i>
+                                    <%= user.role === 'admin' ? 'Admin' : 'User' %>
+                                </span>
+                            </td>
+                            <td>
+                                <span class="date-text">
+                                    <%= new Date(user.createdAt).toLocaleDateString('vi-VN') %>
+                                </span>
+                            </td>
+                            <% if (isAdmin) { %>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/api/v1/user/<%= user._id %>"
+                                           class="btn btn-sm btn-info"
+                                           title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="/api/v1/user/<%= user._id %>/edit"
+                                           class="btn btn-sm btn-warning"
+                                           title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <% if (users.filter(u => u.role === 'admin').length > 1 || user.role !== 'admin') { %>
+                                            <button onclick="deleteUser('<%= user._id %>', '<%= user.name %>')"
+                                                    class="btn btn-sm btn-danger"
+                                                    title="Xóa"
+                                                    <% if (user._id.toString() === currentUser.id) { %>disabled<% } %>>
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            <% } else { %>
+                                <td>
+                                    <a href="/api/v1/user/<%= user._id %>/edit"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Chỉnh sửa
+                                    </a>
+                                </td>
+                            <% } %>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <% if (users.length === 0) { %>
+            <div class="empty-state">
+                <i class="fas fa-users empty-icon"></i>
+                <h3>Không có user nào</h3>
+                <p>
+                    <% if (isAdmin) { %>
+                        Hãy tạo user đầu tiên để bắt đầu.
+                    <% } else { %>
+                        Thông tin của bạn chưa được thiết lập.
+                    <% } %>
+                </p>
+                <% if (isAdmin) { %>
+                    <a href="/api/v1/user/new" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Tạo User mới
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<% if (isAdmin) { %>
+    <div id="deleteModal" class="modal">
+        <div class="modal-content animate-scale-in">
+            <div class="modal-header">
+                <h3>Xác nhận xóa User</h3>
+                <button onclick="closeModal()" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa user <strong id="deleteUserName"></strong>?</p>
+                <p class="warning-text">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Hành động này không thể hoàn tác. Tất cả dữ liệu của user sẽ được lưu trữ để phục hồi nếu cần.
+                </p>
+
+                <form id="deleteForm" method="POST">
+                    <% if (typeof csrfToken !== 'undefined' && csrfToken) { %>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <% } %>
+                    <input type="hidden" id="deleteReason" name="reason" value="admin_action">
+
+                    <div class="form-group">
+                        <label for="deleteNote">Ghi chú (tùy chọn):</label>
+                        <textarea id="deleteNote" name="note" rows="3" placeholder="Lý do xóa user..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+                <button onclick="confirmDelete()" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Xóa User
+                </button>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<script>
+// Search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const roleFilter = document.getElementById('roleFilter');
+    const table = document.getElementById('usersTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    function filterUsers() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const roleValue = roleFilter ? roleFilter.value : '';
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const name = row.cells[0].textContent.toLowerCase();
+            const email = row.cells[1].textContent.toLowerCase();
+            const role = row.cells[4].textContent.toLowerCase();
+
+            const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
+            const matchesRole = !roleValue || role.includes(roleValue.toLowerCase());
+
+            if (matchesSearch && matchesRole) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterUsers);
+    }
+
+    if (roleFilter) {
+        roleFilter.addEventListener('change', filterUsers);
+    }
+});
+
+// Delete user functions
+function deleteUser(userId, userName) {
+    document.getElementById('deleteUserName').textContent = userName;
+    document.getElementById('deleteForm').action = `/api/v1/user/${userId}?_method=DELETE`;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function confirmDelete() {
+    document.getElementById('deleteForm').submit();
+}
+
+function closeModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
