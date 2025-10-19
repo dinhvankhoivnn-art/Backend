@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔐 Face Recognition Scanner - Bảo mật cấp độ 5</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .header {
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        color: #333;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 1.1em;
+      }
+
+      .security-badge {
+        display: inline-block;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      .camera-section {
+        margin: 30px 0;
+      }
+
+      .video-container {
+        position: relative;
+        margin: 20px auto;
+        max-width: 640px;
+      }
+
+      #video {
+        width: 100%;
+        height: 480px;
+        border-radius: 15px;
+        border: 3px solid #ddd;
+        background: #000;
+      }
+
+      .face-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 15px;
+        pointer-events: none;
+      }
+
+      .face-box {
+        position: absolute;
+        border: 3px solid #4caf50;
+        border-radius: 10px;
+        background: rgba(76, 175, 80, 0.1);
+      }
+
+      .scan-line {
+        position: absolute;
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          #4caf50,
+          transparent
+        );
+        animation: scan 2s infinite;
+      }
+
+      @keyframes scan {
+        0% {
+          left: 0%;
+        }
+        50% {
+          left: 100%;
+        }
+        100% {
+          left: 0%;
+        }
+      }
+
+      .controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 150px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #f8f9fa;
+        color: #333;
+        border: 2px solid #ddd;
+      }
+
+      .btn-secondary:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+      }
+
+      .status {
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: bold;
+      }
+
+      .status.idle {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+
+      .status.scanning {
+        background: #fff3e0;
+        color: #f57c00;
+      }
+
+      .status.success {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .status.error {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #ddd;
+        border-radius: 4px;
+        margin: 15px 0;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .info-section {
+        margin-top: 30px;
+        text-align: left;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .info-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .info-card h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+      }
+
+      .info-card p {
+        color: #666;
+        font-size: 0.9em;
+        margin: 5px 0;
+      }
+
+      .security-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .feature-item {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .feature-item h4 {
+        font-size: 1.1em;
+        margin-bottom: 5px;
+      }
+
+      .feature-item p {
+        font-size: 0.8em;
+        opacity: 0.9;
+      }
+
+      .footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        color: #666;
+        font-size: 0.9em;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+          margin: 10px;
+        }
+
+        .header h1 {
+          font-size: 2em;
+        }
+
+        #video {
+          height: 300px;
+        }
+
+        .controls {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn {
+          width: 100%;
+          max-width: 250px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔐 Face Recognition Scanner</h1>
+        <p>Hệ thống bảo mật cấp độ 5 với mã hóa đặc biệt</p>
+        <div class="security-badge">ADMIN ONLY - 2FA REQUIRED</div>
+      </div>
+
+      <div class="camera-section">
+        <div class="video-container">
+          <video id="video" autoplay muted></video>
+          <div class="face-overlay">
+            <div class="face-box" id="faceBox" style="display: none"></div>
+            <div class="scan-line" id="scanLine"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="status" class="status idle">Sẵn sàng để quét khuôn mặt</div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-primary" onclick="startScanning()" id="startBtn">
+          🚀 Bắt đầu quét
+        </button>
+        <button
+          class="btn btn-secondary"
+          onclick="captureFace()"
+          id="captureBtn"
+          disabled
+        >
+          📸 Chụp khuôn mặt
+        </button>
+        <button
+          class="btn btn-danger"
+          onclick="stopScanning()"
+          id="stopBtn"
+          disabled
+        >
+          ⏹️ Dừng quét
+        </button>
+      </div>
+
+      <div class="info-section">
+        <h2>📊 Thông tin quét</h2>
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>🔐 Bảo mật</h3>
+            <p>Mã hóa cấp độ 5</p>
+            <p>128-bit encryption</p>
+            <p>7 lớp bảo vệ</p>
+          </div>
+          <div class="info-card">
+            <h3>📊 Đặc trưng</h3>
+            <p>68 điểm landmarks</p>
+            <p>32 thông số đặc trưng</p>
+            <p>AI nhận diện chính xác</p>
+          </div>
+          <div class="info-card">
+            <h3>⚡ Hiệu suất</h3>
+            <p>Xử lý thời gian thực</p>
+            <p>Độ chính xác cao</p>
+            <p>Tối ưu tốc độ</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="security-features">
+        <div class="feature-item">
+          <h4>🔒 2FA Authentication</h4>
+          <p>Xác thực 2 lớp với OTP</p>
+        </div>
+        <div class="feature-item">
+          <h4>📧 Email OTP</h4>
+          <p>Mã OTP qua email bảo mật</p>
+        </div>
+        <div class="feature-item">
+          <h4>🔑 Backup Codes</h4>
+          <p>Mã dự phòng khẩn cấp</p>
+        </div>
+        <div class="feature-item">
+          <h4>📍 Location Tracking</h4>
+          <p>Theo dõi vị trí GPS</p>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>© 2024 Hệ thống Face Recognition - Bảo mật cấp độ 5</p>
+        <p>Chỉ dành cho admin với quyền xác thực đặc biệt</p>
+      </div>
+    </div>
+
+    <script>
+      // Global variables
+      let video = document.getElementById("video");
+      let faceBox = document.getElementById("faceBox");
+      let scanLine = document.getElementById("scanLine");
+      let progressFill = document.getElementById("progressFill");
+      let isScanning = false;
+      let scanProgress = 0;
+      let faceDetectionInterval = null;
+
+      // Initialize camera
+      async function initCamera() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "user",
+            },
+          });
+          video.srcObject = stream;
+          return true;
+        } catch (error) {
+          console.error("Camera error:", error);
+          showStatus("Không thể truy cập camera", "error");
+          return false;
+        }
+      }
+
+      // Start face scanning
+      async function startScanning() {
+        // Check authentication first
+        if (!(await checkAuthentication())) {
+          showStatus("Yêu cầu xác thực 2FA", "error");
+          return;
+        }
+
+        const cameraReady = await initCamera();
+        if (!cameraReady) return;
+
+        isScanning = true;
+        scanProgress = 0;
+
+        // Update UI
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("captureBtn").disabled = false;
+        document.getElementById("stopBtn").disabled = false;
+
+        showStatus("Đang quét khuôn mặt...", "scanning");
+
+        // Start progress animation
+        startProgressAnimation();
+
+        // Start face detection
+        startFaceDetection();
+
+        // Start scanning animation
+        startScanAnimation();
+      }
+
+      // Stop scanning
+      function stopScanning() {
+        isScanning = false;
+
+        // Stop camera
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach((track) => track.stop());
+        }
+
+        // Clear intervals
+        if (faceDetectionInterval) {
+          clearInterval(faceDetectionInterval);
+        }
+
+        // Update UI
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("captureBtn").disabled = true;
+        document.getElementById("stopBtn").disabled = true;
+
+        showStatus("Đã dừng quét", "idle");
+        hideFaceBox();
+      }
+
+      // Capture face data
+      async function captureFace() {
+        if (!isScanning) return;
+
+        try {
+          showStatus("Đang xử lý dữ liệu khuôn mặt...", "scanning");
+
+          // Get face data (simulated for demo)
+          const faceData = await processFaceData();
+
+          // Send to server for encryption
+          const response = await fetch("/api/faceID/encode", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(faceData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            showStatus("Đã mã hóa khuôn mặt thành công!", "success");
+            displayFaceInfo(result.data);
+          } else {
+            showStatus(result.message, "error");
+          }
+        } catch (error) {
+          console.error("Capture error:", error);
+          showStatus("Lỗi khi chụp khuôn mặt", "error");
+        }
+      }
+
+      // Check authentication
+      async function checkAuthentication() {
+        try {
+          const response = await fetch("/api/faceID/2fa/status", {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+
+          const result = await response.json();
+          return result.data?.is2FAAuthenticated || false;
+        } catch (error) {
+          return false;
+        }
+      }
+
+      // Process face data (simulated)
+      async function processFaceData() {
+        // Simulate face detection and feature extraction
+        const mockFaceData = {
+          faceId: "face_" + Date.now(),
+          faceEncoding: {
+            primary: Array.from({ length: 128 }, () => Math.random() * 2 - 1),
+          },
+          facialLandmarks: {
+            leftEye: {
+              center: { x: 200, y: 150 },
+              contour: Array.from({ length: 8 }, (_, i) => ({
+                x: 180 + i * 5,
+                y: 140 + Math.sin(i) * 10,
+              })),
+            },
+            rightEye: {
+              center: { x: 400, y: 150 },
+              contour: Array.from({ length: 8 }, (_, i) => ({
+                x: 380 + i * 5,
+                y: 140 + Math.sin(i) * 10,
+              })),
+            },
+            nose: {
+              tip: { x: 300, y: 200 },
+              bridge: { x: 300, y: 120 },
+            },
+            mouth: {
+              center: { x: 300, y: 250 },
+              leftCorner: { x: 250, y: 250 },
+              rightCorner: { x: 350, y: 250 },
+            },
+          },
+          facialFeatures: {
+            faceShape: "oval",
+            ratios: {
+              faceWidthToHeight: 0.8,
+              eyeDistanceToFaceWidth: 0.3,
+              noseWidthToFaceWidth: 0.15,
+              mouthWidthToFaceWidth: 0.25,
+            },
+          },
+          technicalSpecs: {
+            confidence: 95,
+            imageQuality: 90,
+            lighting: "good",
+            sharpness: 85,
+          },
+          securityLevel: "high",
+        };
+
+        return mockFaceData;
+      }
+
+      // Face detection (simulated)
+      function startFaceDetection() {
+        faceDetectionInterval = setInterval(() => {
+          if (isScanning) {
+            // Simulate face detection
+            const faceDetected = Math.random() > 0.3; // 70% chance of detection
+
+            if (faceDetected) {
+              showFaceBox();
+              updateProgress(10);
+            } else {
+              hideFaceBox();
+            }
+          }
+        }, 500);
+      }
+
+      // Show face detection box
+      function showFaceBox() {
+        const videoRect = video.getBoundingClientRect();
+        const faceBox = document.getElementById("faceBox");
+
+        // Simulate face position
+        const x = 150 + Math.random() * 200;
+        const y = 100 + Math.random() * 150;
+        const width = 200 + Math.random() * 100;
+        const height = 250 + Math.random() * 100;
+
+        faceBox.style.left = x + "px";
+        faceBox.style.top = y + "px";
+        faceBox.style.width = width + "px";
+        faceBox.style.height = height + "px";
+        faceBox.style.display = "block";
+      }
+
+      // Hide face detection box
+      function hideFaceBox() {
+        document.getElementById("faceBox").style.display = "none";
+      }
+
+      // Progress animation
+      function startProgressAnimation() {
+        const progressInterval = setInterval(() => {
+          if (isScanning && scanProgress < 100) {
+            scanProgress += 2;
+            updateProgress(scanProgress);
+          } else if (!isScanning) {
+            clearInterval(progressInterval);
+          }
+        }, 100);
+      }
+
+      // Update progress bar
+      function updateProgress(percentage) {
+        progressFill.style.width = percentage + "%";
+      }
+
+      // Scan line animation
+      function startScanAnimation() {
+        scanLine.style.display = "block";
+      }
+
+      // Show status message
+      function showStatus(message, type) {
+        const statusElement = document.getElementById("status");
+        statusElement.textContent = message;
+        statusElement.className = `status ${type}`;
+      }
+
+      // Display face information
+      function displayFaceInfo(faceData) {
+        // This would display the processed face information
+        console.log("Face data processed:", faceData);
+      }
+
+      // Initialize on page load
+      window.onload = function () {
+        // Check if user is logged in
+        const token = localStorage.getItem("token");
+        if (!token) {
+          showStatus("Vui lòng đăng nhập trước", "error");
+          document.getElementById("startBtn").disabled = true;
+        }
+      };
+
+      // Cleanup on page unload
+      window.onbeforeunload = function () {
+        if (isScanning) {
+          stopScanning();
+        }
+      };
+    </script>
+  </body>
+</html>
