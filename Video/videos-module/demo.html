@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videos Player Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+            color: white;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .demo-header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .demo-header p {
+            font-size: 1.2em;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .instructions h2 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+
+        .instructions ul {
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .keyboard-shortcuts {
+            background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .keyboard-shortcuts h3 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+
+        .shortcut {
+            display: inline-block;
+            background: #4a90e2;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .video-container {
+            margin-top: 30px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Videos Player</h1>
+            <p>Trình phát video mạnh mẽ với thiết kế OOP và hiệu ứng đẹp mắt</p>
+        </div>
+
+        <div class="instructions">
+            <h2>🎮 Hướng Dẫn Sử Dụng</h2>
+            <ul>
+                <li><strong>Phát/Dừng:</strong> Sử dụng nút Play/Pause</li>
+                <li><strong>Tua nhanh:</strong> Sử dụng các nút -10min, -30s, +30s, +10min</li>
+                <li><strong>Click vào thanh tiến trình:</strong> Để nhảy đến vị trí bất kỳ</li>
+                <li><strong>Volume:</strong> Có thể điều chỉnh bằng phương thức setVolume()</li>
+            </ul>
+
+            <div class="keyboard-shortcuts">
+                <h3>⌨️ Phím Tắt</h3>
+                <div>
+                    <span class="shortcut">Tab</span> - Tua tới 20 giây
+                    <span class="shortcut">Shift + Tab</span> - Tua lùi 20 giây
+                </div>
+            </div>
+        </div>
+
+        <div id="video-container" class="video-container"></div>
+
+        <div class="footer">
+            <p>Built with ❤️ using TypeScript, OOP Design, and Modern Web Technologies</p>
+            <p>Demo video sẽ được tải từ file local hoặc URL bạn cung cấp</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import Videos from './dist/index.js';
+
+        // Khởi tạo video player
+        const container = document.getElementById('video-container');
+
+        // Bạn có thể thay đổi src này thành video thực tế của bạn
+        const videoPlayer = new Videos({
+            container: container,
+            src: 'https://sample-videos.com/zip/10/mp4/360/SampleVideo_360x240_1mb.mp4', // Video demo
+            width: 900,
+            height: 500,
+            autoplay: false
+        });
+
+        // Thông báo khi video sẵn sàng
+        videoPlayer.video.addEventListener('loadedmetadata', () => {
+            console.log('Video đã sẵn sàng!');
+            console.log('Thời lượng:', videoPlayer.getDuration(), 'giây');
+        });
+
+        // Global access để test trong console
+        window.videoPlayer = videoPlayer;
+        console.log('Video player đã được khởi tạo. Bạn có thể sử dụng các lệnh sau:');
+        console.log('- videoPlayer.play()');
+        console.log('- videoPlayer.pause()');
+        console.log('- videoPlayer.skip(30) // tua tới 30s');
+        console.log('- videoPlayer.skip(-30) // tua lùi 30s');
+        console.log('- videoPlayer.setVolume(0.5) // âm lượng 50%');
+    </script>
+</body>
+</html>

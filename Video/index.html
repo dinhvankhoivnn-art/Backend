@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player OOP</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Video Player OOP</h1>
+            <p>Trình phát video hiện đại với thiết kế hướng đối tượng</p>
+        </header>
+
+        <div class="demo-info">
+            <h2>✨ Tính năng nổi bật</h2>
+            <ul>
+                <li>✅ Thiết kế hoàn toàn OOP (Object-Oriented Programming)</li>
+                <li>✅ Controls đẹp mắt với hiệu ứng hover</li>
+                <li>✅ Hỗ trợ tua nhanh: ±30s, ±10 phút</li>
+                <li>✅ Thanh tiến trình có thể click để seek</li>
+                <li>✅ Hiển thị thời gian hiện tại và tổng thời gian</li>
+                <li>✅ Phím tắt: Tab (tua tới), Shift+Tab (tua lùi)</li>
+                <li>✅ Điều khiển âm lượng</li>
+                <li>✅ Animation mượt mà</li>
+            </ul>
+        </div>
+
+        <!-- Đây là container với id="videos" như yêu cầu -->
+        <div id="videos" class="video-player-container"></div>
+
+        <div class="instructions">
+            <h3>🎮 Hướng dẫn sử dụng</h3>
+            <div class="instruction-grid">
+                <div class="instruction-item">
+                    <strong>Phát/Dừng:</strong> Sử dụng nút Play/Pause
+                </div>
+                <div class="instruction-item">
+                    <strong>Tua nhanh:</strong> Các nút -10min, -30s, +30s, +10min
+                </div>
+                <div class="instruction-item">
+                    <strong>Seek:</strong> Click vào thanh tiến trình
+                </div>
+                <div class="instruction-item">
+                    <strong>Phím tắt:</strong> Tab (tới), Shift+Tab (lùi)
+                </div>
+            </div>
+        </div>
+
+        <div class="code-example">
+            <h3>💻 Cách sử dụng trong code</h3>
+            <pre><code>// Khởi tạo video player
+const videoPlayer = new Videos({
+    container: document.getElementById('videos'),
+    src: 'path/to/your/video.mp4',
+    width: 900,
+    height: 500,
+    autoplay: false
+});
+
+// Điều khiển
+videoPlayer.play();
+videoPlayer.pause();
+videoPlayer.skip(30);  // tua tới 30s
+videoPlayer.setVolume(0.5);  // âm lượng 50%</code></pre>
+        </div>
+    </div>
+
+    <script src="video-player.js"></script>
+    <script>
+        // Khởi tạo video player khi trang load xong
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('videos');
+
+            // Tạo video player với video demo
+            window.videoPlayer = new Videos({
+                container: container,
+                src: 'https://sample-videos.com/zip/10/mp4/360/SampleVideo_360x240_1mb.mp4',
+                width: 900,
+                height: 500,
+                autoplay: false,
+                controls: false
+            });
+
+            // Thông báo khi video sẵn sàng
+            window.videoPlayer.video.addEventListener('loadedmetadata', function() {
+                console.log('🎬 Video đã sẵn sàng!');
+                console.log('⏱️ Thời lượng:', window.videoPlayer.getDuration(), 'giây');
+            });
+        });
+    </script>
+</body>
+</html>
