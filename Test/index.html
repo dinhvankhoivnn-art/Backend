@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Generator - Công cụ tạo mã QR chuyên nghiệp</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <div class="app-container">
+      <!-- Overlay cho mobile -->
+      <div class="overlay" id="overlay"></div>
+
+      <!-- Sidebar -->
+      <nav class="sidebar animate-slide-in-left" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <i class="fas fa-qrcode animate-bounce-in"></i>
+            <span>QR Generator</span>
+          </div>
+          <button
+            class="sidebar-toggle animate-rotate-in"
+            id="sidebarToggle"
+            title="Thu gọn/Mở rộng sidebar"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+
+        <div class="sidebar-nav">
+          <div class="nav-section">
+            <h3><i class="fas fa-tools"></i> Công cụ</h3>
+            <div class="nav-item active" data-section="generator">
+              <i class="fas fa-plus-circle"></i>
+              <span>Tạo QR Code</span>
+            </div>
+            <div class="nav-item" data-section="history">
+              <i class="fas fa-history"></i>
+              <span>Lịch sử</span>
+            </div>
+            <div class="nav-item" data-section="scanner">
+              <i class="fas fa-camera"></i>
+              <span>Quét QR Code</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <h3><i class="fas fa-cog"></i> Cài đặt</h3>
+            <div class="nav-item" data-section="settings">
+              <i class="fas fa-sliders-h"></i>
+              <span>Tùy chỉnh</span>
+            </div>
+            <div class="nav-item" data-section="about">
+              <i class="fas fa-info-circle"></i>
+              <span>Giới thiệu</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <div class="avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div>
+              <span style="font-weight: 600">QR Master</span>
+              <span style="font-size: 0.8rem; opacity: 0.7">Online</span>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content" data-aos="fade-in">
+        <!-- Generator Section -->
+        <section class="section active" id="generator">
+          <div
+            class="section-header animate-fade-in"
+            data-aos="fade-up"
+            data-aos-duration="800"
+          >
+            <h1
+              class="rainbow-bg morph-shape"
+              style="
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-size: 200% 200%;
+                animation: rainbow 3s ease infinite;
+              "
+            >
+              <i class="fas fa-qrcode animate-bounce-in"></i> Tạo QR Code
+            </h1>
+            <p data-aos="fade-up" data-aos-delay="200">
+              Chuyển đổi văn bản, URL hoặc thông tin thành mã QR một cách nhanh
+              chóng và dễ dàng
+            </p>
+          </div>
+
+          <div
+            class="generator-container"
+            data-aos="fade-up"
+            data-aos-delay="300"
+          >
+            <!-- Input Panel -->
+            <div
+              class="input-panel"
+              data-aos="slide-in-left"
+              data-aos-delay="400"
+            >
+              <form id="qrForm" class="qr-form">
+                <div class="form-group">
+                  <label for="qrText">
+                    <i class="fas fa-edit"></i>
+                    Nội dung QR Code
+                  </label>
+                  <textarea
+                    id="qrText"
+                    placeholder="Nhập văn bản, URL, số điện thoại hoặc bất kỳ nội dung nào bạn muốn chuyển thành QR Code..."
+                    rows="4"
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="qrSize">
+                      <i class="fas fa-expand-arrows-alt"></i>
+                      Kích thước
+                    </label>
+                    <select id="qrSize">
+                      <option value="200">200x200px (Nhỏ)</option>
+                      <option value="300" selected>
+                        300x300px (Trung bình)
+                      </option>
+                      <option value="400">400x400px (Lớn)</option>
+                      <option value="500">500x500px (Rất lớn)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="qrCorrection">
+                      <i class="fas fa-shield-alt"></i>
+                      Mức纠 lỗi
+                    </label>
+                    <select id="qrCorrection">
+                      <option value="L">L (Thấp - 7%)</option>
+                      <option value="M" selected>M (Trung bình - 15%)</option>
+                      <option value="Q">Q (Cao - 25%)</option>
+                      <option value="H">H (Rất cao - 30%)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="qrColor">
+                      <i class="fas fa-palette"></i>
+                      Màu sắc
+                    </label>
+                    <input type="color" id="qrColor" value="#000000" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="bgColor">
+                      <i class="fas fa-fill-drip"></i>
+                      Màu nền
+                    </label>
+                    <input type="color" id="bgColor" value="#ffffff" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="qrLogo">
+                    <i class="fas fa-image"></i>
+                    Logo (tùy chọn)
+                  </label>
+                  <div class="file-upload-area" id="logoUpload">
+                    <input type="file" id="qrLogo" accept="image/*" />
+                    <div class="upload-content">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <span>Kéo thả logo vào đây hoặc click để chọn file</span>
+                      <div class="file-info">
+                        Định dạng: PNG, JPG, SVG (tối đa 2MB)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="action-buttons"
+                  data-aos="zoom-in"
+                  data-aos-delay="600"
+                >
+                  <button type="submit" class="btn btn-primary animate-pulse">
+                    <i class="fas fa-magic"></i>
+                    Tạo QR Code
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-success animate-bounce-in"
+                    onclick="app.generateQRCode()"
+                  >
+                    <i class="fas fa-plus"></i>
+                    Tạo nhanh
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-secondary animate-wiggle"
+                    id="clearBtn"
+                  >
+                    <i class="fas fa-trash"></i>
+                    Xóa tất cả
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Preview Panel -->
+            <div
+              class="preview-panel"
+              data-aos="slide-in-right"
+              data-aos-delay="500"
+            >
+              <div class="qr-display">
+                <div class="qr-placeholder" id="qrPlaceholder">
+                  <i class="fas fa-qrcode"></i>
+                  <p>QR Code của bạn sẽ xuất hiện ở đây</p>
+                  <small>Nhập nội dung và nhấn "Tạo QR Code" để bắt đầu</small>
+                </div>
+                <div
+                  class="qr-container"
+                  id="qrContainer"
+                  style="display: none"
+                >
+                  <canvas id="qrCanvas"></canvas>
+                  <div
+                    class="qr-actions"
+                    data-aos="flip-in"
+                    data-aos-delay="800"
+                  >
+                    <button
+                      class="btn btn-success animate-bounce-in"
+                      id="downloadBtn"
+                    >
+                      <i class="fas fa-download"></i>
+                      Tải xuống
+                    </button>
+                    <button class="btn btn-info animate-rotate-in" id="saveBtn">
+                      <i class="fas fa-save"></i>
+                      Lưu vào bộ sưu tập
+                    </button>
+                    <button
+                      class="btn btn-secondary animate-zoom-in"
+                      id="printBtn"
+                    >
+                      <i class="fas fa-print"></i>
+                      In QR Code
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="section" id="history">
+          <div class="section-header">
+            <h1><i class="fas fa-history"></i> Lịch sử QR Code</h1>
+            <p>Quản lý và xem lại các mã QR đã tạo trước đây</p>
+          </div>
+
+          <div class="history-container">
+            <div class="history-controls">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input
+                  type="text"
+                  id="historySearch"
+                  placeholder="Tìm kiếm QR Code..."
+                />
+              </div>
+              <div class="history-actions">
+                <button class="btn btn-primary" id="clearHistoryBtn">
+                  <i class="fas fa-trash"></i>
+                  Xóa tất cả
+                </button>
+              </div>
+            </div>
+
+            <div class="history-list" id="historyList">
+              <div class="no-history" id="noHistory">
+                <i class="fas fa-inbox"></i>
+                <h3>Chưa có lịch sử</h3>
+                <p>
+                  Bạn chưa tạo QR Code nào. Hãy tạo QR Code đầu tiên của bạn!
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scanner Section -->
+        <section class="section" id="scanner">
+          <div class="section-header">
+            <h1><i class="fas fa-camera"></i> Quét QR Code</h1>
+            <p>Sử dụng camera để quét và đọc mã QR từ hình ảnh hoặc thực tế</p>
+          </div>
+
+          <div class="scanner-container">
+            <div class="scanner-panel">
+              <div class="scanner-display">
+                <video id="scannerVideo" style="display: none"></video>
+                <canvas id="scannerCanvas" width="400" height="300"></canvas>
+                <div class="scanner-placeholder" id="scannerPlaceholder">
+                  <i class="fas fa-camera"></i>
+                  <h3>Bật camera để quét QR Code</h3>
+                  <p>Hãy cho phép truy cập camera để bắt đầu quét mã QR</p>
+                  <button class="btn btn-primary" id="startScanBtn">
+                    <i class="fas fa-play"></i>
+                    Bắt đầu quét
+                  </button>
+                </div>
+              </div>
+              <div class="scan-results" id="scanResults" style="display: none">
+                <h3>Kết quả quét:</h3>
+                <div class="result-content" id="resultContent"></div>
+                <div class="result-actions">
+                  <button class="btn btn-success" id="copyResultBtn">
+                    <i class="fas fa-copy"></i>
+                    Sao chép
+                  </button>
+                  <button class="btn btn-info" id="openResultBtn">
+                    <i class="fas fa-external-link-alt"></i>
+                    Mở liên kết
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="section" id="settings">
+          <div class="section-header">
+            <h1><i class="fas fa-sliders-h"></i> Cài đặt</h1>
+            <p>Tùy chỉnh giao diện và hành vi của ứng dụng</p>
+          </div>
+
+          <div class="settings-container">
+            <div class="setting-group">
+              <h3><i class="fas fa-palette"></i> Giao diện</h3>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <span>Chế độ tối</span>
+                  <p>Bật/tắt giao diện tối để bảo vệ mắt</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="darkModeToggle" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <span>Thu gọn sidebar</span>
+                  <p>Tự động thu gọn sidebar khi không sử dụng</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="autoCollapseToggle" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <h3><i class="fas fa-bell"></i> Thông báo</h3>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <span>Âm thanh thông báo</span>
+                  <p>Phát âm thanh khi hoàn thành tác vụ</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="soundToggle" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <span>Hiển thị preview</span>
+                  <p>Hiển thị preview tức thì khi nhập liệu</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="previewToggle" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <h3><i class="fas fa-save"></i> Lưu trữ</h3>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <span>Tự động lưu</span>
+                  <p>Tự động lưu QR Code vào bộ sưu tập sau khi tạo</p>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="autoSaveToggle" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-info">
+                  <span>Giới hạn lịch sử</span>
+                  <p>
+                    Giới hạn số lượng QR Code trong lịch sử (0 = không giới hạn)
+                  </p>
+                </div>
+                <input
+                  type="number"
+                  id="historyLimit"
+                  value="100"
+                  min="0"
+                  max="1000"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section" id="about">
+          <div class="section-header">
+            <h1><i class="fas fa-info-circle"></i> Giới thiệu</h1>
+            <p>Thông tin về ứng dụng QR Code Generator</p>
+          </div>
+
+          <div class="about-container">
+            <div class="about-card">
+              <i class="fas fa-qrcode"></i>
+              <h2>QR Code Generator</h2>
+              <p>
+                Công cụ tạo và quản lý mã QR chuyên nghiệp với giao diện hiện
+                đại và nhiều tính năng mạnh mẽ.
+              </p>
+
+              <div class="features-list">
+                <h3><i class="fas fa-star"></i> Tính năng nổi bật</h3>
+                <ul>
+                  <li>
+                    <i class="fas fa-check"></i> Tạo QR Code từ văn bản, URL, số
+                    điện thoại
+                  </li>
+                  <li>
+                    <i class="fas fa-check"></i> Tùy chỉnh màu sắc và kích thước
+                  </li>
+                  <li><i class="fas fa-check"></i> Thêm logo vào QR Code</li>
+                  <li>
+                    <i class="fas fa-check"></i> Lưu trữ và quản lý lịch sử
+                  </li>
+                  <li><i class="fas fa-check"></i> Quét QR Code từ camera</li>
+                  <li>
+                    <i class="fas fa-check"></i> Giao diện responsive và hiện
+                    đại
+                  </li>
+                  <li><i class="fas fa-check"></i> Hỗ trợ chế độ tối</li>
+                  <li>
+                    <i class="fas fa-check"></i> Xuất hình ảnh chất lượng cao
+                  </li>
+                </ul>
+              </div>
+
+              <div class="tech-info">
+                <h3><i class="fas fa-code"></i> Công nghệ sử dụng</h3>
+                <div class="tech-tags">
+                  <span class="tech-tag">HTML5</span>
+                  <span class="tech-tag">CSS3</span>
+                  <span class="tech-tag">JavaScript</span>
+                  <span class="tech-tag">QRCode.js</span>
+                  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+                  <span class="tech-tag">LocalStorage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+          <script src="https://unpkg.com/animate.css@4.1.1/animate.css"></script>
+        </section>
+      </main>
+    </div>
+
+    <!-- Floating Action Buttons cho collapsed sidebar -->
+    <div class="floating-actions">
+      <button
+        class="floating-btn"
+        onclick="app.generateQRCode()"
+        title="Tạo QR Code"
+      >
+        <i class="fas fa-magic"></i>
+      </button>
+      <button class="floating-btn" onclick="app.clearForm()" title="Xóa tất cả">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+
+    <!-- Notifications -->
+    <div class="notification" id="notification">
+      <span id="notificationText"></span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none">
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Đang xử lý...</p>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
