@@ -8,6 +8,7 @@
 - [Node.js cơ bản](#nodejs-cơ-bản)
 - [Express.js chi tiết](#expressjs-chi-tiết)
 - [Routing và Middleware](#routing-và-middleware)
+- [HTTP Methods](#http-methods)
 - [MongoDB và Mongoose](#mongodb-và-mongoose)
 - [Models và Schemas](#models-và-schemas)
 - [CRUD Operations](#crud-operations)
@@ -253,6 +254,93 @@ app.use(cors());
 const helmet = require("helmet");
 app.use(helmet());
 ```
+
+## 🌐 HTTP Methods
+
+HTTP Methods (hoặc HTTP Verbs) là các phương thức định nghĩa hành động cho yêu cầu từ client đến server. Trong backend, chúng được sử dụng để tương tác với API endpoints.
+
+### GET - Lấy dữ liệu
+
+Sử dụng để truy vấn và lấy thông tin từ server. Không thay đổi dữ liệu.
+
+- **Idempotent:** Có thể gọi nhiều lần mà không ảnh hưởng.
+- Ví dụ: Lấy danh sách users.
+
+```javascript
+app.get("/users", (req, res) => {
+  // Logic to get users
+  res.json(users);
+});
+```
+
+### POST - Tạo mới
+
+Sử dụng để tạo tài nguyên mới. Thay đổi dữ liệu.
+
+- **Non-idempotent:** Mỗi lần gọi có thể tạo mới.
+- Ví dụ: Đăng ký user mới.
+
+```javascript
+app.post("/users", (req, res) => {
+  const newUser = new User(req.body);
+  newUser.save().then((user) => res.status(201).json(user));
+});
+```
+
+### PUT - Cập nhật toàn bộ
+
+Sử dụng để thay thế hoàn toàn tài nguyên. Thay đổi dữ liệu.
+
+- **Idempotent:** Cập nhật cùng giá trị nhiều lần không thay đổi.
+- Ví dụ: Cập nhật user với id.
+
+```javascript
+app.put("/users/:id", (req, res) => {
+  User.findByIdAndUpdate(req.params.id, req.body, { new: true }).then((user) =>
+    res.json(user)
+  );
+});
+```
+
+### PATCH - Cập nhật một phần
+
+Sử dụng để cập nhật một phần của tài nguyên. Thay đổi dữ liệu.
+
+- **Idempotent:** Tương tự PUT.
+- Ví dụ: Cập nhật chỉ email của user.
+
+```javascript
+app.patch("/users/:id", (req, res) => {
+  User.findByIdAndUpdate(
+    req.params.id,
+    { email: req.body.email },
+    { new: true }
+  ).then((user) => res.json(user));
+});
+```
+
+### DELETE - Xóa
+
+Sử dụng để xóa tài nguyên. Thay đổi dữ liệu.
+
+- **Idempotent:** Xóa cùng tài nguyên nhiều lần không lỗi.
+- Ví dụ: Xóa user.
+
+```javascript
+app.delete("/users/:id", (req, res) => {
+  User.findByIdAndDelete(req.params.id).then(() =>
+    res.json({ message: "User deleted" })
+  );
+});
+```
+
+### Các Methods khác
+
+- **HEAD:** Tương tự GET nhưng chỉ lấy headers, không body.
+- **OPTIONS:** Lấy thông tin về methods được hỗ trợ.
+- **TRACE:** Debug, theo dõi path của request.
+
+**Mẹo:** Luôn sử dụng methods phù hợp với hành động. RESTful APIs thường dùng GET cho read, POST cho create, PUT/PATCH cho update, DELETE cho delete. Sử dụng status codes tương ứng (200 cho GET, 201 cho POST, 204 cho DELETE).
 
 ## 🗄️ MongoDB và Mongoose
 
