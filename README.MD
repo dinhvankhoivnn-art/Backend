@@ -13,6 +13,7 @@
 - [CRUD Operations](#crud-operations)
 - [Authentication và Authorization](#authentication-và-authorization)
 - [Security Best Practices](#security-best-practices)
+- [HTTP Status Codes](#http-status-codes)
 - [Error Handling](#error-handling)
 - [Testing](#testing)
 - [Deployment](#deployment)
@@ -497,6 +498,43 @@ app.post(
 
 - Rate limiting: `npm install express-rate-limit`
 - Sanitize data.
+
+## 📊 HTTP Status Codes
+
+HTTP Status Codes là các mã phản hồi từ server để chỉ ra kết quả của yêu cầu. Chúng được chia thành các nhóm chính:
+
+### 1.xx Informational (Thông tin)
+
+- **100 Continue**: Server đã nhận được header và client nên tiếp tục gửi body.
+
+### 2.xx Success (Thành công)
+
+- **200 OK**: Yêu cầu thành công.
+- **201 Created**: Tài nguyên mới đã được tạo (thường dùng cho POST).
+- **204 No Content**: Yêu cầu thành công nhưng không có nội dung trả về.
+
+### 3.xx Redirection (Chuyển hướng)
+
+- **301 Moved Permanently**: Tài nguyên đã di chuyển vĩnh viễn.
+- **304 Not Modified**: Tài nguyên không thay đổi kể từ lần truy cập cuối.
+
+### 4.xx Client Error (Lỗi client)
+
+- **400 Bad Request**: Yêu cầu không hợp lệ.
+- **401 Unauthorized**: Xác thực thất bại.
+- **403 Forbidden**: Server hiểu yêu cầu nhưng từ chối.
+- **404 Not Found**: Tài nguyên không tồn tại.
+- **422 Unprocessable Entity**: Dữ liệu gửi lên không hợp lệ (validation error).
+
+### 5.xx Server Error (Lỗi server)
+
+- **500 Internal Server Error**: Lỗi nội bộ server.
+- **502 Bad Gateway**: Server nhận phản hồi không hợp lệ từ upstream.
+- **503 Service Unavailable**: Server tạm thời không khả dụng.
+
+**Mẹo:** Luôn sử dụng status codes phù hợp trong API để client hiểu rõ kết quả. Ví dụ, sử dụng 201 cho tạo mới, 404 cho không tìm thấy.
+
+Xem tất cả codes tại: [MDN HTTP Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
 
 ## ⚠️ Error Handling
 
