@@ -4,7 +4,9 @@ const getAllBootcamps = (req, res) => {
 };
 // ! tạo bootcamp
 const createBootcamp = (req, res) => {
-  res.status(200).json({ success: true, msg: "Create new bootcamp" });
+  res
+    .status(200)
+    .json({ success: true, hi: req.hello, msg: "Create new bootcamp" });
 };
 // ! cập nhật bootcamp
 const updateBootcamp = (req, res) => {
