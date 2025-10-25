@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+const colors = require("colors");
 
 const bootcamps = require("./routes/bootcamps");
 const { logger } = require("./middleware/logger");
@@ -24,7 +25,7 @@ const PORT = process.env.PORT || 5000;
 app.use("/v1/bootcamps", bootcamps);
 
 const server = app.listen(PORT, () =>
-  console.log(`Server started on port ${PORT}`)
+  console.log(`Server started on port ${PORT.cyan.bold}`)
 );
 // ! handle unhandled promise rejection
 process.on("unhandledRejection", (err, promise) => {
